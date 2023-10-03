@@ -1,0 +1,26 @@
+type NFT @entity {
+  id: ID!
+  name: String
+  symbol: String
+  totalSupply: BigInt
+  mintCount: BigInt!
+  totalMintedQuantity: BigInt!
+  totalMintedPrice: BigInt!
+}
+
+
+type FeeRecipient @entity {
+  id: ID!
+  totalFee: BigInt!
+}
+
+
+
+
+
+
+
+
+
+
+
