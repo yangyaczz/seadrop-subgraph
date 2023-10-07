@@ -12,13 +12,13 @@ type FeeRecipient @entity {
   totalFee: BigInt!
 }
 
-type DailyStats @entity {
+type DailyStat @entity {
   id: ID!
   dailyMintedQuantity: BigInt!
   dailyMintedValue: BigInt!
 }
 
-type DailyNFTStats @entity {
+type DailyNFTStat @entity {
   id: ID!
   dailyMintedQuantity: BigInt!
 }

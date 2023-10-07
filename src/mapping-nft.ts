@@ -2,7 +2,7 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 
 import { SeaDropMint as SeaDropMintEvent } from '../generated/SeaDropEvent/SeaDropEvent'
 
-import { NFT, FeeRecipient, DailyStats, DailyNFTStats } from '../generated/schema'
+import { NFT, FeeRecipient, DailyStat, DailyNFTStat } from '../generated/schema'
 
 import { IERC721a } from '../generated/SeaDropEvent/IERC721a'
 
@@ -58,26 +58,26 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
 
     // daily stats
     const dayString = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
-    let dailyStats = DailyStats.load(dayString)
-    if (!dailyStats) {
-        dailyStats = new DailyStats(dayString)
-        dailyStats.dailyMintedQuantity = BigInt.fromI32(0)
-        dailyStats.dailyMintedValue = BigInt.fromI32(0)
+    let dailyStat = DailyStat.load(dayString)
+    if (!dailyStat) {
+        dailyStat = new DailyStat(dayString)
+        dailyStat.dailyMintedQuantity = BigInt.fromI32(0)
+        dailyStat.dailyMintedValue = BigInt.fromI32(0)
     }
 
-    dailyStats.dailyMintedQuantity.plus(event.params.quantityMinted)
-    dailyStats.dailyMintedValue.plus(volumn)
-    dailyStats.save()
+    dailyStat.dailyMintedQuantity = dailyStat.dailyMintedQuantity.plus(event.params.quantityMinted)
+    dailyStat.dailyMintedValue = dailyStat.dailyMintedValue.plus(volumn)
+    dailyStat.save()
 
     // daily nft stats
-    let dailyNFTStats = DailyNFTStats.load(event.params.nftContract.toHexString() + '-' + dayString)
-    if (!dailyNFTStats) {
-        dailyNFTStats = new DailyNFTStats(event.params.nftContract.toHexString() + '-' + dayString)
-        dailyNFTStats.dailyMintedQuantity = BigInt.fromI32(0)
+    let dailyNFTStat = DailyNFTStat.load(event.params.nftContract.toHexString() + '-' + dayString)
+    if (!dailyNFTStat) {
+        dailyNFTStat = new DailyNFTStat(event.params.nftContract.toHexString() + '-' + dayString)
+        dailyNFTStat.dailyMintedQuantity = BigInt.fromI32(0)
     }
 
-    dailyNFTStats.dailyMintedQuantity = dailyNFTStats.dailyMintedQuantity.plus(event.params.quantityMinted)
-    dailyNFTStats.save()
+    dailyNFTStat.dailyMintedQuantity = dailyNFTStat.dailyMintedQuantity.plus(event.params.quantityMinted)
+    dailyNFTStat.save()
 
 }
 
