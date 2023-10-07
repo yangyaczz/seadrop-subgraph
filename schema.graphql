@@ -2,18 +2,26 @@ type NFT @entity {
   id: ID!
   name: String
   symbol: String
-  totalSupply: BigInt
   mintCount: BigInt!
   totalMintedQuantity: BigInt!
-  totalMintedPrice: BigInt!
+  totalMintedValue: BigInt!
 }
-
 
 type FeeRecipient @entity {
   id: ID!
   totalFee: BigInt!
 }
 
+type DailyStats @entity {
+  id: ID!
+  dailyMintedQuantity: BigInt!
+  dailyMintedValue: BigInt!
+}
+
+type DailyNFTStats @entity {
+  id: ID!
+  dailyMintedQuantity: BigInt!
+}
 
 
 

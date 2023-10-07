@@ -2,25 +2,21 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 
 import { SeaDropMint as SeaDropMintEvent } from '../generated/SeaDropEvent/SeaDropEvent'
 
-
-import { NFT, FeeRecipient } from '../generated/schema'
+import { NFT, FeeRecipient, DailyStats, DailyNFTStats } from '../generated/schema'
 
 import { IERC721a } from '../generated/SeaDropEvent/IERC721a'
 
 
 export function handleSeaDropMint(event: SeaDropMintEvent): void {
 
+    // NFT entity
     let nft = NFT.load(event.params.nftContract.toHexString())
-
-
-    let volumn = event.params.unitMintPrice.times(event.params.quantityMinted)
 
     if (!nft) {
         nft = new NFT(event.params.nftContract.toHexString())
-        nft.totalMintedQuantity = event.params.quantityMinted
-        nft.totalMintedPrice = volumn
-        nft.mintCount = event.params.quantityMinted
-
+        nft.totalMintedQuantity = BigInt.fromI32(0)
+        nft.totalMintedValue = BigInt.fromI32(0)
+        nft.mintCount = BigInt.fromI32(0)
 
         let contract = IERC721a.bind(event.params.nftContract)
 
@@ -33,45 +29,55 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
         if (!symbol.reverted) {
             nft.symbol = symbol.value
         }
-
-        let totalSupply = contract.try_totalSupply()
-        if (!totalSupply.reverted) {
-            nft.totalSupply = totalSupply.value
-        }
-
-
-    } else {
-        nft.totalMintedQuantity = nft.totalMintedQuantity.plus(event.params.quantityMinted)
-        nft.totalMintedPrice = nft.totalMintedPrice.plus(volumn)
-        nft.mintCount = nft.mintCount.plus(event.params.quantityMinted)
     }
 
+    let volumn = event.params.unitMintPrice.times(event.params.quantityMinted)
+
+    nft.totalMintedQuantity = nft.totalMintedQuantity.plus(event.params.quantityMinted)
+    nft.totalMintedValue = nft.totalMintedValue.plus(volumn)
+    nft.mintCount = nft.mintCount.plus(BigInt.fromI32(1))
+
+    nft.save()
 
 
+    // FeeRecipient entity
     if (event.params.feeBps.notEqual(BigInt.fromI32(0))) {
-
-        let fee = volumn.times(event.params.feeBps).div(BigInt.fromI32(10000))
 
         let feeRecipient = FeeRecipient.load(event.params.feeRecipient.toHexString())
 
         if (!feeRecipient) {
             feeRecipient = new FeeRecipient(event.params.feeRecipient.toHexString())
-            feeRecipient.totalFee = fee
-        } else {
-            feeRecipient.totalFee = feeRecipient.totalFee.plus(fee)
+            feeRecipient.totalFee = BigInt.fromI32(0)
         }
 
-        feeRecipient.save()
+        let fee = volumn.times(event.params.feeBps).div(BigInt.fromI32(10000))
+        feeRecipient.totalFee = feeRecipient.totalFee.plus(fee)
 
+        feeRecipient.save()
     }
 
+    // daily stats
+    const dayString = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
+    let dailyStats = DailyStats.load(dayString)
+    if (!dailyStats) {
+        dailyStats = new DailyStats(dayString)
+        dailyStats.dailyMintedQuantity = BigInt.fromI32(0)
+        dailyStats.dailyMintedValue = BigInt.fromI32(0)
+    }
 
-    nft.save()
+    dailyStats.dailyMintedQuantity.plus(event.params.quantityMinted)
+    dailyStats.dailyMintedValue.plus(volumn)
+    dailyStats.save()
 
+    // daily nft stats
+    let dailyNFTStats = DailyNFTStats.load(event.params.nftContract.toHexString() + '-' + dayString)
+    if (!dailyNFTStats) {
+        dailyNFTStats = new DailyNFTStats(event.params.nftContract.toHexString() + '-' + dayString)
+        dailyNFTStats.dailyMintedQuantity = BigInt.fromI32(0)
+    }
 
-
-
-
+    dailyNFTStats.dailyMintedQuantity = dailyNFTStats.dailyMintedQuantity.plus(event.params.quantityMinted)
+    dailyNFTStats.save()
 
 }
 
