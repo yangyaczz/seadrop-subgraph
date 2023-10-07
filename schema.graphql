@@ -20,7 +20,7 @@ type DailyStat @entity {
 
 type DailyNFTStat @entity {
   id: ID!
-  dailyMintedQuantity: BigInt!
+  date: [String!]!
 }
 
 

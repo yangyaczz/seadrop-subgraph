@@ -70,13 +70,19 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
     dailyStat.save()
 
     // daily nft stats
-    let dailyNFTStat = DailyNFTStat.load(event.params.nftContract.toHexString() + '-' + dayString)
+    let dailyNFTStat = DailyNFTStat.load(event.params.nftContract.toHexString())
+    let ts = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
+
     if (!dailyNFTStat) {
-        dailyNFTStat = new DailyNFTStat(event.params.nftContract.toHexString() + '-' + dayString)
-        dailyNFTStat.dailyMintedQuantity = BigInt.fromI32(0)
+        dailyNFTStat = new DailyNFTStat(event.params.nftContract.toHexString())
+        dailyNFTStat.date = [ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString()]
+    } else {
+        let dmq = dailyNFTStat.date
+        dmq.push(ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString())
+        dailyNFTStat.date = dmq
     }
 
-    dailyNFTStat.dailyMintedQuantity = dailyNFTStat.dailyMintedQuantity.plus(event.params.quantityMinted)
+
     dailyNFTStat.save()
 
 }
