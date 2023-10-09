@@ -18,7 +18,7 @@ dataSources:
         - Pair
         - FeeRecipient
         - DailyStats
-        - DailyNFTStats
+        - NFTMintedEvent
 
       abis:
         - name: SeaDropEvent

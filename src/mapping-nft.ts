@@ -2,7 +2,7 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 
 import { SeaDropMint as SeaDropMintEvent } from '../generated/SeaDropEvent/SeaDropEvent'
 
-import { NFT, FeeRecipient, DailyStat, DailyNFTStat } from '../generated/schema'
+import { NFT, FeeRecipient, DailyStat, NFTMintedEvent } from '../generated/schema'
 
 import { IERC721a } from '../generated/SeaDropEvent/IERC721a'
 
@@ -69,21 +69,28 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
     dailyStat.dailyMintedValue = dailyStat.dailyMintedValue.plus(volumn)
     dailyStat.save()
 
+
+    // NFT Minted Event
+    let nftMintedEvent = new NFTMintedEvent(event.params.nftContract.toHexString() + '-' + event.logIndex.toString())
+    nftMintedEvent.nft = nft.id
+    nftMintedEvent.minter = event.params.minter.toHexString()
+    nftMintedEvent.quantity = event.params.quantityMinted
+    nftMintedEvent.data = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
+    nftMintedEvent.save()
+
+
+
     // daily nft stats
-    let dailyNFTStat = DailyNFTStat.load(event.params.nftContract.toHexString())
-    let ts = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
-
-    if (!dailyNFTStat) {
-        dailyNFTStat = new DailyNFTStat(event.params.nftContract.toHexString())
-        dailyNFTStat.date = [ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString()]
-    } else {
-        let dmq = dailyNFTStat.date
-        dmq.push(ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString())
-        dailyNFTStat.date = dmq
-    }
-
-
-    dailyNFTStat.save()
-
+    // let dailyNFTStat = DailyNFTStat.load(event.params.nftContract.toHexString())
+    // let ts = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
+    // if (!dailyNFTStat) {
+    //     dailyNFTStat = new DailyNFTStat(event.params.nftContract.toHexString())
+    //     dailyNFTStat.date = [ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString()]
+    // } else {
+    //     let dmq = dailyNFTStat.date
+    //     dmq.push(ts + "-" + event.params.minter.toHexString() + "-" + event.params.quantityMinted.toString())
+    //     dailyNFTStat.date = dmq
+    // }
+    // dailyNFTStat.save()
 }
 
