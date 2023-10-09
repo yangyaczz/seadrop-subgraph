@@ -24,7 +24,7 @@ type NFTMintedEvent @entity {
   nft: NFT!
   minter: String!
   quantity: BigInt!
-  data: String!
+  date: String!
 }
 
 type DailyNFTStat @entity {

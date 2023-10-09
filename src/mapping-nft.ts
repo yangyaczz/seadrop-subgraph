@@ -71,11 +71,11 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
 
 
     // NFT Minted Event
-    let nftMintedEvent = new NFTMintedEvent(event.params.nftContract.toHexString() + '-' + event.logIndex.toString())
+    let nftMintedEvent = new NFTMintedEvent(event.transaction.hash.toHexString() + '-' + event.logIndex.toString())
     nftMintedEvent.nft = nft.id
     nftMintedEvent.minter = event.params.minter.toHexString()
     nftMintedEvent.quantity = event.params.quantityMinted
-    nftMintedEvent.data = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
+    nftMintedEvent.date = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
     nftMintedEvent.save()
 
 
