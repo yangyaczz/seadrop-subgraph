@@ -6,6 +6,7 @@ type NFT @entity {
   totalMintedQuantity: BigInt!
   totalMintedValue: BigInt!
   events: [NFTMintedEvent!]! @derivedFrom(field: "nft")
+  dailyMinted: [DailyMinted!]! @derivedFrom(field: "nft")
 }
 
 type FeeRecipient @entity {
@@ -27,9 +28,10 @@ type NFTMintedEvent @entity {
   date: String!
 }
 
-type DailyNFTStat @entity {
+type DailyMinted @entity {
   id: ID!
-  date: [String!]!
+  nft: NFT!
+  dailyMintedQuantity: BigInt!
 }
 
 

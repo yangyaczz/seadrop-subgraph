@@ -2,7 +2,7 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 
 import { SeaDropMint as SeaDropMintEvent } from '../generated/SeaDropEvent/SeaDropEvent'
 
-import { NFT, FeeRecipient, DailyStat, NFTMintedEvent } from '../generated/schema'
+import { NFT, FeeRecipient, DailyStat, NFTMintedEvent, DailyMinted } from '../generated/schema'
 
 import { IERC721a } from '../generated/SeaDropEvent/IERC721a'
 
@@ -78,6 +78,19 @@ export function handleSeaDropMint(event: SeaDropMintEvent): void {
     nftMintedEvent.date = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 19).replaceAll("-", "")
     nftMintedEvent.save()
 
+
+
+    // DailyMinted
+    let dailyMinted = DailyMinted.load(event.params.nftContract.toHexString() + '-' + dayString)
+
+    if (!dailyMinted) {
+        dailyMinted = new DailyMinted(event.params.nftContract.toHexString() + '-' + dayString)
+        dailyMinted.nft = nft.id
+        dailyMinted.dailyMintedQuantity = BigInt.fromI32(0)
+    }
+
+    dailyMinted.dailyMintedQuantity = dailyMinted.dailyMintedQuantity.plus(event.params.quantityMinted)
+    dailyMinted.save()
 
 
     // daily nft stats

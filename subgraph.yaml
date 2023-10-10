@@ -19,6 +19,7 @@ dataSources:
         - FeeRecipient
         - DailyStats
         - NFTMintedEvent
+        - DailyMinted
 
       abis:
         - name: SeaDropEvent
